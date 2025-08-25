@@ -68,13 +68,51 @@ header h1.date{font-size:2.8em;margin-bottom:10px;}
 /* Секции контента */
 section{padding:60px 20px;margin:40px 0;background:#f5f5f5;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.05);}
 
-/* Фото зала */
-.hall-grid{display:flex;gap:10px;flex-wrap:wrap;}
-.hall-left,.hall-right{display:flex;flex-direction:column;gap:10px;}
-.hall-left{flex:1;}
-.hall-right{flex:1;}
-.hall-left img{width:100%;height:100%;object-fit:cover;border-radius:10px;}
-.hall-right img{width:100%;flex:1;object-fit:cover;border-radius:10px;}
+/* Фото зала (слайдер) */
+.slider {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.slides {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+.slides img {
+  width: 100%;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 20px;
+  transition: background 0.3s;
+}
+.prev:hover, .next:hover { background: rgba(0,0,0,0.7); }
+.prev { left: 15px; }
+.next { right: 15px; }
+.dots { text-align:center;margin-top:10px; }
+.dot {
+  height:12px;width:12px;
+  margin:0 5px;
+  background:#bbb;
+  border-radius:50%;
+  display:inline-block;
+  cursor:pointer;
+  transition:background 0.3s;
+}
+.dot.active {background:#333;}
 
 /* План мероприятия */
 .schedule ul{list-style:none;padding:0;max-width:600px;margin:0 auto;}
@@ -82,7 +120,7 @@ section{padding:60px 20px;margin:40px 0;background:#f5f5f5;border-radius:10px;bo
 .schedule li strong{display:block;font-size:1.3em;color:#000;margin-bottom:5px;}
 .schedule li p{margin:0;font-size:1em;color:#333;line-height:1.5;}
 
-/* Дрескод */
+/* Дресскод */
 .dresscode { padding: 40px 20px; background: #f5f5f5; border-radius: 10px; text-align: center; margin: 40px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
 .dresscode h2 { font-family: 'Cormorant Infant', serif; font-weight: 300; font-size: 2em; margin-bottom: 20px; }
 .dresscode-circles { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
@@ -110,9 +148,6 @@ footer a{color:#bc8887;font-weight:bold;margin:0 10px;}
     header h1.name{font-size:3.5em;}
     header h1.date{font-size:1.8em;}
     h2{font-size:2em;}
-    .hall-grid{flex-direction:column;}
-    .hall-left,.hall-right{flex:1 1 100%;}
-    .hall-right img{height:auto;}
 }
 </style>
 </head>
@@ -134,12 +169,17 @@ footer a{color:#bc8887;font-weight:bold;margin:0 10px;}
 </section>
 
 <section class="hall">
-    <h2 style="text-align:center;margin-bottom:20px;">Место, где мы проведём наш праздник</h2>
-    <div class="hall-grid">
-        <div class="hall-right">
-            <img src="images/photo4.jpg" alt="Место проведения"> 
-        </div>
+    <h2>Место, где мы проведём наш праздник</h2>
+    <div class="slider">
+      <div class="slides">
+        <img src="images/photo4.jpg" alt="Место проведения">
+        <img src="images/photo5.jpg" alt="Зал">
+        <img src="images/photo6.jpg" alt="Интерьер">
+      </div>
+      <button class="prev">&#10094;</button>
+      <button class="next">&#10095;</button>
     </div>
+    <div class="dots"></div>
 </section>
 
 <section class="location">
@@ -165,7 +205,6 @@ footer a{color:#bc8887;font-weight:bold;margin:0 10px;}
 <section class="dresscode">
   <h2>Дресс-код</h2>
   <p>Будем рады, если при выборе нарядов, вы придержитесь пастельной цветовой гаммы нашего торжества. Выбирайте стильные цвета для праздника!</p>
-
   <div class="dresscode-circles">
     <div class="circle" style="background-color:#757575;" title="Серый"></div>
     <div class="circle" style="background-color:#FFFFFF; border:2px solid #ccc;" title="Белый"></div>
@@ -184,14 +223,6 @@ footer a{color:#bc8887;font-weight:bold;margin:0 10px;}
     <iframe src="https://forms.yandex.ru/u/68a35957f47e731c608fc700?iframe=1" frameborder="0"></iframe>
 </section>
 
-<section class="hall">
-    <div class="hall-grid">
-        <div class="hall-right">
-            <img src="images/photo5.jpg" alt="Совместное фото">
-        </div>
-    </div>
-</section>
-
 <footer>
     <p>Связь в Telegram: <a href="https://t.me/Roman04ru">Роман</a>, <a href="https://t.me/punpunnnnnnn">Юлия</a></p>
 </footer>
@@ -208,23 +239,32 @@ function countdown(){
     document.getElementById("countdown").innerHTML = d+"д "+h+"ч "+m+"м "+s+"с";
 }
 setInterval(countdown,1000);
+
+// Слайдер
+let index = 0;
+const slides = document.querySelector('.slides');
+const images = document.querySelectorAll('.slides img');
+const total = images.length;
+const dotsContainer = document.querySelector('.dots');
+
+images.forEach((_, i) => {
+  const dot = document.createElement('span');
+  dot.classList.add('dot');
+  if(i === 0) dot.classList.add('active');
+  dot.addEventListener('click', () => showSlide(i));
+  dotsContainer.appendChild(dot);
+});
+const dots = document.querySelectorAll('.dot');
+
+function showSlide(i) {
+  index = (i + total) % total;
+  slides.style.transform = `translateX(-${index * 100}%)`;
+  dots.forEach(dot => dot.classList.remove('active'));
+  dots[index].classList.add('active');
+}
+document.querySelector('.next').onclick = () => showSlide(index + 1);
+document.querySelector('.prev').onclick = () => showSlide(index - 1);
+setInterval(() => showSlide(index + 1), 5000);
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
